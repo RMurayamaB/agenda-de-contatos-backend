@@ -1,38 +1,33 @@
 import { Injectable } from '@nestjs/common';
-
-interface Contact {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Contact } from './contact.entity';
 
 @Injectable()
 export class ContactsService {
-  private contacts: Contact[] = [];
+  constructor(
+    @InjectRepository(Contact)
+    private contactsRepository: Repository<Contact>,
+  ) {}
 
-  create(contact: Contact): Contact {
-    this.contacts.push(contact);
-    return contact;
+  async createcontact(
+    name: string,
+    email: string,
+    phone: string,
+  ): Promise<Contact> {
+    const contact = this.contactsRepository.create({ name, email, phone });
+    return this.contactsRepository.save(contact);
   }
 
-  findAll(): Contact[] {
-    return this.contacts;
+  async findAll(): Promise<Contact[]> {
+    return this.contactsRepository.find();
   }
 
-  findById(id: number): Contact | undefined {
-    return this.contacts.find((contact) => contact.id === id);
+  async findById(id: number): Promise<Contact> {
+    return this.contactsRepository.findOne({ where: { id } });
   }
 
-  update(id: number, contact: Contact): Contact {
-    const index = this.contacts.findIndex((c) => c.id === id);
-    if (index !== -1) {
-      this.contacts[index] = contact;
-      return this.contacts[index];
-    }
-  }
-
-  remove(id: number): void {
-    this.contacts = this.contacts.filter((contact) => contact.id !== id);
+  async delete(id: number): Promise<void> {
+    await this.contactsRepository.delete(id);
   }
 }

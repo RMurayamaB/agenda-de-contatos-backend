@@ -1,41 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Delete,
-  Put,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
+import { Contact } from './contact.entity';
 
 @Controller('contacts')
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
   @Post()
-  create(@Body() contact): any {
-    return this.contactsService.create(contact);
+  create(@Body() contact: Contact): Promise<Contact> {
+    return this.contactsService.createcontact(
+      contact.name,
+      contact.email,
+      contact.phone,
+    );
   }
 
   @Get()
-  findAll(): any {
+  findAll(): Promise<Contact[]> {
     return this.contactsService.findAll();
   }
 
   @Get(':id')
-  findById(@Body() id): any {
+  findById(@Param('id') id: number): Promise<Contact> {
     return this.contactsService.findById(id);
   }
 
-  @Put(':id')
-  update(@Body() id, @Body() contact): any {
-    return this.contactsService.update(id, contact);
-  }
-
   @Delete(':id')
-  remove(@Param('id') id: number): any {
-    this.contactsService.remove(id);
-    return { message: 'Contact deleted successfully' };
+  delete(@Param('id') id: number): Promise<void> {
+    return this.contactsService.delete(id);
   }
 }
